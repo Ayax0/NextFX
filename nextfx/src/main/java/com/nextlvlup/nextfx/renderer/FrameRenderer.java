@@ -67,6 +67,10 @@ public abstract class FrameRenderer extends Renderer{
 		return stage;
 	}
 	
+	public Scene getScene() {
+		return mainScene;
+	}
+	
 	public Node getRoot() {
 		return comp_root;
 	}
