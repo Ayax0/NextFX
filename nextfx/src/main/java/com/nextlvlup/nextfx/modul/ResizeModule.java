@@ -12,6 +12,8 @@ public class ResizeModule extends FrameModule {
 	
 	private boolean enabled = true;
 	
+	private boolean resizeCorner = true;
+	
 	private double minWidth = 80;
 	private double minHeight = 50;
 
@@ -32,15 +34,17 @@ public class ResizeModule extends FrameModule {
 					
 					//Top
 					if(y == 0) {
-						//Top-Left
-						if(x == 0) {
-							setResizeable(Cursor.NW_RESIZE);
-							return;
-						}
-						//Tep-Right
-						if(x== width) {
-							setResizeable(Cursor.NE_RESIZE);
-							return;
+						if(resizeCorner){
+							//Top-Left
+							if(x == 0) {
+								setResizeable(Cursor.NW_RESIZE);
+								return;
+							}
+							//Tep-Right
+							if(x== width) {
+								setResizeable(Cursor.NE_RESIZE);
+								return;
+							}
 						}
 						setResizeable(Cursor.N_RESIZE);
 						return;
@@ -48,15 +52,17 @@ public class ResizeModule extends FrameModule {
 					
 					//Bottom
 					if(y == height) {
-						//Bottom-Left
-						if(x == 0) {
-							setResizeable(Cursor.SW_RESIZE);
-							return;
-						}
-						//Bottom-Right
-						if(x == width) {
-							setResizeable(Cursor.SE_RESIZE);
-							return;
+						if(resizeCorner) {
+							//Bottom-Left
+							if(x == 0) {
+								setResizeable(Cursor.SW_RESIZE);
+								return;
+							}
+							//Bottom-Right
+							if(x == width) {
+								setResizeable(Cursor.SE_RESIZE);
+								return;
+							}
 						}
 						setResizeable(Cursor.S_RESIZE);
 						return;
@@ -127,60 +133,62 @@ public class ResizeModule extends FrameModule {
 						return;
 					}
 					
-					//Top-Left
-					if(resizeable == Cursor.NW_RESIZE) {
-						double resizeX = getRenderer().getStage().getWidth() - (e.getScreenX() - x);
-						double resizeY = getRenderer().getStage().getHeight() - (e.getScreenY() - y);
-						
-						if(resizeX >= minWidth) {
-							getRenderer().getStage().setX(e.getScreenX());
-							getRenderer().getStage().setWidth(resizeX);
+					if(resizeCorner) {
+						//Top-Left
+						if(resizeable == Cursor.NW_RESIZE) {
+							double resizeX = getRenderer().getStage().getWidth() - (e.getScreenX() - x);
+							double resizeY = getRenderer().getStage().getHeight() - (e.getScreenY() - y);
+							
+							if(resizeX >= minWidth) {
+								getRenderer().getStage().setX(e.getScreenX());
+								getRenderer().getStage().setWidth(resizeX);
+							}
+							
+							if(resizeY >= minHeight) {
+								getRenderer().getStage().setY(e.getScreenY());
+								getRenderer().getStage().setHeight(resizeY);
+							}
+							return;
 						}
 						
-						if(resizeY >= minHeight) {
-							getRenderer().getStage().setY(e.getScreenY());
-							getRenderer().getStage().setHeight(resizeY);
-						}
-						return;
-					}
-					
-					//Top_Right
-					if(resizeable == Cursor.NE_RESIZE) {
-						double resizeX = getRenderer().getStage().getWidth() - ((x + width)- e.getScreenX());
-						double resizeY = getRenderer().getStage().getHeight() - (e.getScreenY() - y);
-						
-						if(resizeX >= minWidth) getRenderer().getStage().setWidth(resizeX);
-						
-						if(resizeY >= minHeight) {
-							getRenderer().getStage().setY(e.getScreenY());
-							getRenderer().getStage().setHeight(resizeY);
-						}
-						return;
-					}
-					
-					//Bottom-Left
-					if(resizeable == Cursor.SW_RESIZE) {
-						double resizeX = getRenderer().getStage().getWidth() - (e.getScreenX() - x);
-						double resizeY = getRenderer().getStage().getHeight() - ((y + height)- e.getScreenY());
-						
-						if(resizeX >= minWidth) {
-							getRenderer().getStage().setX(e.getScreenX());
-							getRenderer().getStage().setWidth(resizeX);
+						//Top_Right
+						if(resizeable == Cursor.NE_RESIZE) {
+							double resizeX = getRenderer().getStage().getWidth() - ((x + width)- e.getScreenX());
+							double resizeY = getRenderer().getStage().getHeight() - (e.getScreenY() - y);
+							
+							if(resizeX >= minWidth) getRenderer().getStage().setWidth(resizeX);
+							
+							if(resizeY >= minHeight) {
+								getRenderer().getStage().setY(e.getScreenY());
+								getRenderer().getStage().setHeight(resizeY);
+							}
+							return;
 						}
 						
-						if(resizeY >= minHeight) getRenderer().getStage().setHeight(resizeY);
-						return;
-					}
-					
-					//Bottom-Right
-					if(resizeable == Cursor.SE_RESIZE) {
-						double resizeX = getRenderer().getStage().getWidth() - ((x + width)- e.getScreenX());
-						double resizeY = getRenderer().getStage().getHeight() - ((y + height)- e.getScreenY());
+						//Bottom-Left
+						if(resizeable == Cursor.SW_RESIZE) {
+							double resizeX = getRenderer().getStage().getWidth() - (e.getScreenX() - x);
+							double resizeY = getRenderer().getStage().getHeight() - ((y + height)- e.getScreenY());
+							
+							if(resizeX >= minWidth) {
+								getRenderer().getStage().setX(e.getScreenX());
+								getRenderer().getStage().setWidth(resizeX);
+							}
+							
+							if(resizeY >= minHeight) getRenderer().getStage().setHeight(resizeY);
+							return;
+						}
 						
-						if(resizeX >= minWidth) getRenderer().getStage().setWidth(resizeX);
-						
-						if(resizeY >= minHeight) getRenderer().getStage().setHeight(resizeY);
-						return;
+						//Bottom-Right
+						if(resizeable == Cursor.SE_RESIZE) {
+							double resizeX = getRenderer().getStage().getWidth() - ((x + width)- e.getScreenX());
+							double resizeY = getRenderer().getStage().getHeight() - ((y + height)- e.getScreenY());
+							
+							if(resizeX >= minWidth) getRenderer().getStage().setWidth(resizeX);
+							
+							if(resizeY >= minHeight) getRenderer().getStage().setHeight(resizeY);
+							return;
+						}
 					}
 				}
 			}
@@ -201,6 +209,10 @@ public class ResizeModule extends FrameModule {
 	
 	public void enable() {
 		enabled = true;
+	}
+	
+	public void setCornerResizeable(boolean state) {
+		resizeCorner = state;
 	}
 	
 	private void setResizeable(Cursor cursor) {
