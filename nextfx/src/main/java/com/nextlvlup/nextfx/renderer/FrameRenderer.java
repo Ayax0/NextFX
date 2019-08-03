@@ -3,7 +3,9 @@ package com.nextlvlup.nextfx.renderer;
 import java.io.IOException;
 
 import com.nextlvlup.nextfx.NextFX;
+
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -32,7 +34,11 @@ public abstract class FrameRenderer extends Renderer{
 	private FXMLLoader fxmlLoader;
 	
 	//Component
+	private StackPane comp_stack;
 	private Node comp_root;
+	
+	//Var
+	private OverlayRenderer overlay;
 	
 	public FrameRenderer(Stage stage, StageStyle style, String fxml) {
 		//define
@@ -45,8 +51,13 @@ public abstract class FrameRenderer extends Renderer{
 		//Init Component
 		try { this.comp_root = fxmlLoader.load(); } catch (IOException e) {e.printStackTrace();}
 		
+		//Stacked Root
+		this.comp_stack = new StackPane(comp_root);
+		this.comp_stack.setAlignment(Pos.TOP_LEFT);
+		this.comp_stack.setStyle("-fx-background-color: #fff;");
+		
 		//Create New Scene
-		this.mainScene = new Scene((Parent) comp_root);
+		this.mainScene = new Scene((Parent) comp_stack);
 		
 		//Configuration
 		
@@ -61,6 +72,15 @@ public abstract class FrameRenderer extends Renderer{
 	
 	public void setIcon(String icon) {
 		this.stage.getIcons().add(new Image(NextFX.getResourceAsStream(icon)));
+	}
+	
+	public void setOverlay(OverlayRenderer overlay) {
+		this.overlay = overlay;
+		this.comp_stack.getChildren().add(this.overlay.getRoot());
+	}
+	
+	public OverlayRenderer getOverlay() {
+		return overlay;
 	}
 	
 	public Stage getStage() {
