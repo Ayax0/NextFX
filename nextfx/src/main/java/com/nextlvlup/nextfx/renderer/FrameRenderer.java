@@ -59,6 +59,10 @@ public abstract class FrameRenderer extends Renderer{
 		//Create New Scene
 		this.mainScene = new Scene((Parent) comp_stack);
 		
+		//Init Style
+		for(String stylesheet : getStaticStylesheets()) 
+			mainScene.getStylesheets().add(NextFX.getResource(stylesheet).toExternalForm());
+		
 		//Configuration
 		
 		this.stage.initStyle(style);
@@ -95,9 +99,9 @@ public abstract class FrameRenderer extends Renderer{
 		return comp_root;
 	}
 	
-	public void drawComponent(ComponentRenderer component) {
-		drawComponent(component.getRoot());
-		component.setParent(this);
+	public void drawComponent(ComponentRenderer renderer) {
+		renderer.setParent(this);
+		drawComponent(renderer.getRoot());
 	}
 	
 	public void drawComponent(Node component) {
