@@ -78,6 +78,10 @@ public abstract class FrameRenderer extends Renderer{
 		this.stage.getIcons().add(new Image(NextFX.getResourceAsStream(icon)));
 	}
 	
+	public StackPane getStackPane() {
+		return comp_stack;
+	}
+	
 	public void setOverlay(OverlayRenderer overlay) {
 		this.overlay = overlay;
 		this.comp_stack.getChildren().add(this.overlay.getRoot());
