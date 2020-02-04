@@ -1,11 +1,16 @@
 package com.nextlvlup.nextfx.renderer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.nextlvlup.nextfx.NextFX;
+import com.nextlvlup.nextfx.listener.WindowListener;
+import com.nextlvlup.nextfx.states.WindowState;
 
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -19,27 +24,41 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class FrameRenderer extends Renderer{
 	
 	//Stage
-	private Stage stage;
+	@Getter private Stage stage;
 	
 	//Scene
-	private Scene mainScene;
+	@Getter private Scene scene;
 	
 	//FXMLLoader
 	private FXMLLoader fxmlLoader;
 	
 	//Component
-	private StackPane comp_stack;
-	private Node comp_root;
+	@Getter private StackPane stackPane;
+	@Getter private Node root;
+	
+	//Listener
+	private List<WindowListener> listener_window = new ArrayList<WindowListener>();
 	
 	//Var
-	private OverlayRenderer overlay;
+	@Getter private OverlayRenderer overlay;
 	
+	@Getter @Setter private boolean resizeable = true;
+	
+	private double x;
+	private double y;
+	private double width;
+	private double height;
+	
+	//Constructor
 	public FrameRenderer(Stage stage, StageStyle style, String fxml) {
 		//define
 		this.stage = stage;
@@ -49,27 +68,28 @@ public abstract class FrameRenderer extends Renderer{
 		this.fxmlLoader.setController(this);
 		
 		//Init Component
-		try { this.comp_root = fxmlLoader.load(); } catch (IOException e) {e.printStackTrace();}
+		try { this.root = fxmlLoader.load(); } catch (IOException e) {e.printStackTrace();}
 		
 		//Stacked Root
-		this.comp_stack = new StackPane(comp_root);
-		this.comp_stack.setAlignment(Pos.TOP_LEFT);
-		this.comp_stack.setStyle("-fx-background-color: #fff;");
+		this.stackPane = new StackPane(getRoot());
+		this.stackPane.setAlignment(Pos.TOP_LEFT);
+		this.stackPane.setStyle("-fx-background-color: #fff;");
 		
 		//Create New Scene
-		this.mainScene = new Scene((Parent) comp_stack);
+		this.scene = new Scene((Parent) getStackPane());
 		
 		//Init Style
 		for(String stylesheet : getStaticStylesheets()) 
-			mainScene.getStylesheets().add(NextFX.getResource(stylesheet).toExternalForm());
+			getScene().getStylesheets().add(NextFX.getResource(stylesheet).toExternalForm());
 		
 		//Configuration
 		
 		this.stage.initStyle(style);
-		this.stage.setScene(mainScene);
+		this.stage.setScene(getScene());
 		this.stage.show();
 	}
 	
+	//Window Controll
 	public void setTitel(String titel) {
 		this.stage.setTitle(titel);
 	}
@@ -78,31 +98,53 @@ public abstract class FrameRenderer extends Renderer{
 		this.stage.getIcons().add(new Image(NextFX.getResourceAsStream(icon)));
 	}
 	
-	public StackPane getStackPane() {
-		return comp_stack;
-	}
-	
 	public void setOverlay(OverlayRenderer overlay) {
 		this.overlay = overlay;
-		this.comp_stack.getChildren().add(this.overlay.getRoot());
+		getStackPane().getChildren().add(this.overlay.getRoot());
 	}
 	
-	public OverlayRenderer getOverlay() {
-		return overlay;
+	public void maximize() {
+		if(!isMaximized()) {
+			Rectangle2D bounds = getScreenBounds();
+			
+			x = getStage().getX();
+			y = getStage().getY();
+			width = getStage().getWidth();
+			height = getStage().getHeight();
+			
+			getStage().setX(bounds.getMinX());
+			getStage().setY(bounds.getMinY());
+			getStage().setWidth(bounds.getWidth());
+			getStage().setHeight(bounds.getHeight());
+			
+			for(WindowListener listener : listener_window) {
+				listener.onAction(this, WindowState.MAXIMIZED);
+			}
+		}
 	}
 	
-	public Stage getStage() {
-		return stage;
+	public void minimize() {
+		getStage().setX(x);
+		getStage().setY(y);
+		getStage().setWidth(width);
+		getStage().setHeight(height);
+		
+		for(WindowListener listener : listener_window) {
+			listener.onAction(this, WindowState.DEFULT);
+		}
 	}
 	
-	public Scene getScene() {
-		return mainScene;
+	//Getter
+	public boolean isMaximized() {
+		Rectangle2D bounds = Screen.getScreensForRectangle(getStage().getX(), getStage().getY(), getStage().getWidth(), getStage().getHeight()).get(0).getVisualBounds();
+		if(getStage().getWidth() != bounds.getWidth()) return false;
+		if(getStage().getHeight() != bounds.getHeight()) return false;
+		if(getStage().getX() != bounds.getMinX()) return false;
+		if(getStage().getY() != bounds.getMinY()) return false;
+		return true;
 	}
 	
-	public Node getRoot() {
-		return comp_root;
-	}
-	
+	//Content Management
 	public void drawComponent(ComponentRenderer renderer) {
 		renderer.setParent(this);
 		drawComponent(renderer.getRoot());
@@ -119,5 +161,15 @@ public abstract class FrameRenderer extends Renderer{
 		if(getRoot() instanceof TilePane) 	{((TilePane)getRoot()).getChildren().add(component);		return;}
 		if(getRoot() instanceof VBox) 		{((VBox)getRoot()).getChildren().add(component);			return;}
 		System.out.println("No Supported Root Node found ...");
+	}
+
+	//Screen Info
+	public Rectangle2D getScreenBounds() {
+		return Screen.getScreensForRectangle(getStage().getX(), getStage().getY(), getStage().getWidth(), getStage().getHeight()).get(0).getVisualBounds();
+	}
+	
+	//Listener
+	public void setOnWindowResize(WindowListener listener) {
+		this.listener_window.add(listener);
 	}
 }
