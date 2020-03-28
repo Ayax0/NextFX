@@ -49,8 +49,6 @@ public abstract class FrameRenderer extends Renderer{
 	private List<WindowListener> listener_window = new ArrayList<WindowListener>();
 	
 	//Var
-	@Getter private OverlayRenderer overlay;
-	
 	@Getter @Setter private boolean resizeable = true;
 	
 	private double x;
@@ -89,6 +87,32 @@ public abstract class FrameRenderer extends Renderer{
 		this.stage.show();
 	}
 	
+	//FXMLless Constructor
+	public FrameRenderer(Stage stage, StageStyle style, Parent parent) {
+		//define
+		this.stage = stage;
+		
+		//Init Component
+		this.root = parent;
+		
+		//Stacked Root
+		this.stackPane = new StackPane(getRoot());
+		this.stackPane.setAlignment(Pos.TOP_LEFT);
+		this.stackPane.setStyle("-fx-background-color: #fff;");
+		
+		//Create New Scene
+		this.scene = new Scene((Parent) getStackPane());
+		
+		//Init Style
+		for(String stylesheet : getStaticStylesheets()) 
+			getScene().getStylesheets().add(NextFX.getResource(stylesheet).toExternalForm());
+		
+		//Configuration
+		this.stage.initStyle(style);
+		this.stage.setScene(getScene());
+		this.stage.show();
+	}
+	
 	//Window Controll
 	public void setTitel(String titel) {
 		this.stage.setTitle(titel);
@@ -98,9 +122,12 @@ public abstract class FrameRenderer extends Renderer{
 		this.stage.getIcons().add(new Image(NextFX.getResourceAsStream(icon)));
 	}
 	
-	public void setOverlay(OverlayRenderer overlay) {
-		this.overlay = overlay;
-		getStackPane().getChildren().add(this.overlay.getRoot());
+	public void setBorder(String color) {
+		getRoot().setStyle("-fx-border-color: " + color + "; -fx-border-width: 1;");
+	}
+	
+	public void addOverlay(OverlayRenderer overlay) {
+		getStackPane().getChildren().add(overlay.getRoot());
 	}
 	
 	public void maximize() {

@@ -30,6 +30,10 @@ public abstract class ComponentRenderer extends Renderer{
 		}
 	}
 	
+	public ComponentRenderer(Node node) {
+		this.component = node;
+	}
+	
 	protected void setParent(FrameRenderer parent) {
 		this.parent = parent;
 	}
